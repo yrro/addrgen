@@ -1,8 +1,9 @@
 import ctypes
+import ctypes.util
 
 NID_secp256k1 = 714
 
-ssl = ctypes.cdll.LoadLibrary ('libssl.so.1.0.0')
+ssl = ctypes.cdll.LoadLibrary (ctypes.util.find_library ('ssl'))
 
 ssl.EC_KEY_new_by_curve_name.argtypes = ctypes.c_int,
 def errcheck_EC_KEY_new_by_curve_name (result, func, arguments):
