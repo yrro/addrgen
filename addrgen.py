@@ -1,6 +1,7 @@
 import argparse
 import binascii
 import hashlib
+import multiprocessing
 
 import base58
 import ctssl
@@ -22,19 +23,23 @@ def addr (pub):
         result += h6.digest ()[:4]
         return base58.encode (result)
 
+def generate (*args):
+        with ctssl.EC_KEY () as key:
+                priv = key.priv ()
+                pub = key.pub ()
+                return key.priv (), key.pub ()
+
 def main ():
         parser = argparse.ArgumentParser (description = 'Generate Bitcoin addresses.')
         parser.add_argument ('--count', '-c', help='Number of addresses to generate', action='store', default=1)
         parser.add_argument ('--raw', '-r', help='Display raw private/public key', action='store_true')
         a = parser.parse_args ()
 
-        for x in range (int (a.count)):
-                with ctssl.EC_KEY () as key:
-                        priv = key.priv ()
-                        pub = key.pub ()
-                        print (wif (priv).decode ('ascii'), addr (pub).decode ('ascii'))
-                        if a.raw:
-                                print ('', binascii.hexlify (priv).decode ('ascii'), binascii.hexlify (pub).decode ('ascii'))
+        p = multiprocessing.Pool (processes=multiprocessing.cpu_count ())
+        for priv, pub in p.map (generate, range (int (a.count))):
+                print (wif (priv).decode ('ascii'), addr (pub).decode ('ascii'))
+                if a.raw:
+                        print ('', binascii.hexlify (priv).decode ('ascii'), binascii.hexlify (pub).decode ('ascii'))
 
 if __name__ == '__main__':
         main ()
