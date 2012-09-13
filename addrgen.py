@@ -7,6 +7,12 @@ import base58
 import ctssl
 
 def wif (priv):
+        '''
+        Convert raw private key to base58-encoded wallet import format.
+
+        >>> wif (binascii.unhexlify (b'338b7f9c13b44747fdef077898f688411693df40d5f6943ebba30917125934c9'))
+        b'5JCzE8aEchKzGQThaYqKn5bcHvisWThwC2tU3eUB6VVAx1WV5fQ'
+        '''
         result = b'\x80' + b'\x00' * (32 - len (priv)) + priv
         h1 = hashlib.sha256 (result)
         h2 = hashlib.sha256 (h1.digest ())
@@ -14,6 +20,12 @@ def wif (priv):
         return base58.encode (result)
 
 def addr (pub):
+        '''
+        Convert raw public key to base58check-encoded address.
+
+        >>> addr (binascii.unhexlify (b'04bbed292cf660fcd6fd29590ea53bbad38603a8b55d93806d12af56c994bae8d1df64d4b52607543c44031b26c401648928f748dd447c736b3c47f61f38477c28'))
+        b'1Br8AVNn7XtvEBHc5hyaXsnPZFVAbLpNiL'
+        '''
         assert len (pub) == 65 # pad?
         h3 = hashlib.sha256 (pub)
         h4 = hashlib.new ('ripemd160', h3.digest ())
