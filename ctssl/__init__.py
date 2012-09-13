@@ -1,9 +1,7 @@
 import ctypes
 
+import ctssl.err as err
 import ctssl.detail as detail
-
-class SSLError (Exception):
-        pass
 
 class EC_KEY:
         def __init__ (self):
@@ -20,7 +18,7 @@ class EC_KEY:
         def pub (self):
                 size = detail.ssl.i2o_ECPublicKey (self.k, 0)
                 if size == 0:
-                        raise SSLError ('buffer too short')
+                        raise err.SSLError
                 b = ctypes.create_string_buffer (size)
                 detail.ssl.i2o_ECPublicKey (self.k, ctypes.byref (ctypes.pointer (b)))
                 return b.raw
@@ -29,12 +27,10 @@ class EC_KEY:
                 pk = detail.ssl.EC_KEY_get0_private_key (self.k)
                 size = BN_num_bytes (pk)
                 if size == 0:
-                        raise SSLError ('BIGNUM too short')
+                        raise err.SSLError
                 b = ctypes.create_string_buffer (size)
                 detail.ssl.BN_bn2bin (pk, ctypes.pointer (b))
                 return b.raw
 
 def BN_num_bytes (bn):
         return (detail.ssl.BN_num_bits (bn) + 7) // 8
-
-

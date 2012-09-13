@@ -43,4 +43,5 @@ def main ():
 
 if __name__ == '__main__':
         print_lock = multiprocessing.Lock ()
-        main ()
+        with ctssl.err.strings ():
+                main ()
