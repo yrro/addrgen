@@ -14,6 +14,7 @@ def wif (priv):
         b'5JCzE8aEchKzGQThaYqKn5bcHvisWThwC2tU3eUB6VVAx1WV5fQ'
         '''
         result = b'\x80' + b'\x00' * (32 - len (priv)) + priv
+        assert len (result) == 33
         h1 = hashlib.sha256 (result)
         h2 = hashlib.sha256 (h1.digest ())
         result += h2.digest ()[:4]
@@ -27,6 +28,7 @@ def addr (pub):
         b'1Br8AVNn7XtvEBHc5hyaXsnPZFVAbLpNiL'
         '''
         assert len (pub) == 65 # pad?
+        assert pub[0] == 4
         h3 = hashlib.sha256 (pub)
         h4 = hashlib.new ('ripemd160', h3.digest ())
         result = b'\x00' + h4.digest ()
