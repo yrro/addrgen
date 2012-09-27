@@ -6,21 +6,21 @@ import multiprocessing
 import base58
 import ctssl
 
-def wif (priv):
+def wif (priv, testnet=False):
         '''
         Convert raw private key to base58-encoded wallet import format.
 
         >>> wif (binascii.unhexlify (b'338b7f9c13b44747fdef077898f688411693df40d5f6943ebba30917125934c9'))
         b'5JCzE8aEchKzGQThaYqKn5bcHvisWThwC2tU3eUB6VVAx1WV5fQ'
         '''
-        result = b'\x80' + b'\x00' * (32 - len (priv)) + priv
+        result = (b'\x80' if not testnet else b'\xef') + (b'\x00' * (32 - len (priv)) + priv)
         assert len (result) == 33
         h1 = hashlib.sha256 (result)
         h2 = hashlib.sha256 (h1.digest ())
         result += h2.digest ()[:4]
         return base58.encode (result)
 
-def addr (pub):
+def addr (pub, testnet=False):
         '''
         Convert raw public key to base58check-encoded address.
 
@@ -31,7 +31,7 @@ def addr (pub):
         assert pub[0] == 4
         h3 = hashlib.sha256 (pub)
         h4 = hashlib.new ('ripemd160', h3.digest ())
-        result = b'\x00' + h4.digest ()
+        result = (b'\x00' if not testnet else b'\x6f') + h4.digest ()
         h5 = hashlib.sha256 (result)
         h6 = hashlib.sha256 (h5.digest ())
         result += h6.digest ()[:4]
@@ -42,7 +42,7 @@ def generate (a):
                 priv = key.priv ()
                 pub = key.pub ()
                 with print_lock:
-                        print (wif (priv).decode ('ascii'), addr (pub).decode ('ascii'))
+                        print (wif (priv, testnet=a.testnet).decode ('ascii'), addr (pub, testnet=a.testnet).decode ('ascii'))
                         if a.raw:
                                 print ('', binascii.hexlify (priv).decode ('ascii'), binascii.hexlify (pub).decode ('ascii'))
 
@@ -50,6 +50,7 @@ def main ():
         parser = argparse.ArgumentParser (description = 'Generate Bitcoin addresses.')
         parser.add_argument ('--count', '-c', help='Number of addresses to generate', action='store', default=1)
         parser.add_argument ('--raw', '-r', help='Display raw private/public key', action='store_true')
+        parser.add_argument ('--testnet', '-t', help='Generate testnet address', action='store_true')
         a = parser.parse_args ()
 
         p = multiprocessing.Pool (processes=multiprocessing.cpu_count ())
