@@ -1,6 +1,9 @@
 import ctypes
 import ctypes.util
 
+POINT_CONVERSION_COMPRESSED = 2
+POINT_CONVERSION_UNCOMPRESSED = 4
+
 NID_secp256k1 = 714
 
 ssl = ctypes.cdll.LoadLibrary (ctypes.util.find_library ('ssl'))

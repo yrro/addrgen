@@ -4,12 +4,14 @@ import ctssl.err as err
 import ctssl.detail as detail
 
 class EC_KEY:
-        def __init__ (self):
+        def __init__ (self, compressed=True):
+                self.compressed = compressed
                 pass
 
         def __enter__ (self):
                 self.k = detail.ssl.EC_KEY_new_by_curve_name (detail.NID_secp256k1)
                 detail.ssl.EC_KEY_generate_key (self.k)
+                detail.ssl.EC_KEY_set_conv_form (self.k, detail.POINT_CONVERSION_COMPRESSED if self.compressed else detail.POINT_CONVERSION_UNCOMPRESSED)
                 return self
 
         def __exit__ (self, *exc_info):
